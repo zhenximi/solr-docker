@@ -1,0 +1,88 @@
+version: '3'
+services:
+  zookeeper-A:
+    image: zookeeper:3.4.11 
+    ports:
+      - "2181"
+      - "2888"
+      - "3888"
+    container_name: zookeeper-A
+    restart: always
+    volumes:
+      - ./zoo1/data:/data
+      - ./zoo1/datalog:/datalog
+    environment:
+      TZ: America/New_York
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper-A:2888:3888 server.2=zookeeper-B:2888:3888 server.3=zookeeper-C:2888:3888
+  zookeeper-B:
+    image: zookeeper:3.4.11 
+    ports:
+      - "2181"
+      - "2888"
+      - "3888"
+    container_name: zookeeper-B
+    restart: always
+    volumes:
+      - ./zoo2/data:/data
+      - ./zoo2/datalog:/datalog
+    environment:
+      TZ: America/New_York
+      ZOO_MY_ID: 2
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper-A:2888:3888 server.2=zookeeper-B:2888:3888 server.3=zookeeper-C:2888:3888
+  zookeeper-C:
+    image: zookeeper:3.4.11 
+    ports:
+      - "2181"
+      - "2888"
+      - "3888"
+    container_name: zookeeper-C
+    restart: always
+    volumes:
+      - ./zoo3/data:/data
+      - ./zoo3/datalog:/datalog
+    environment:
+      TZ: America/New_York
+      ZOO_MY_ID: 3
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper-A:2888:3888 server.2=zookeeper-B:2888:3888 server.3=zookeeper-C:2888:3888
+  solr-1:
+    image: solr:7.5   
+    ports:
+      - "8983:8983"
+    container_name: solr-1
+    restart: always
+    environment:
+      ZK_HOST: zookeeper-A:2181,zookeeper-A:2181,zookeeper-A:2181
+    depends_on:
+      - zookeeper-A
+      - zookeeper-B
+      - zookeeper-C
+  solr-2:
+    image: solr:7.5   
+    ports:
+      - "8984:8983"
+    container_name: solr-2
+    restart: always
+    environment:
+      ZK_HOST: zookeeper-A:2181,zookeeper-A:2181,zookeeper-A:2181
+    depends_on:
+      - zookeeper-A
+      - zookeeper-B
+      - zookeeper-C
+  solr-3:
+    image: solr:7.5   
+    ports:
+      - "8985:8983"
+    container_name: solr-3
+    restart: always
+    environment:
+      ZK_HOST: zookeeper-A:2181,zookeeper-A:2181,zookeeper-A:2181
+    depends_on:
+      - zookeeper-A
+      - zookeeper-B
+      - zookeeper-C
+networks:
+  solr:
